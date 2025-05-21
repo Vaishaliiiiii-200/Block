@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract StudentGradingSystem {
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not owner");
+        _;
+    }
+
+    struct Student {
+        string name;
+        bool exists;
+        mapping(string => uint8) grades;
+        string[] subjects;
+        mapping(string => bool) subjectAdded;
+    }
+
+    mapping(uint => Student) students;
+
+    function addStudent(uint id, string memory name) public onlyOwner {
+        require(!students[id].exists, "ID exists");
+        students[id].name = name;
+        students[id].exists = true;
+    }
+
+    function assignGrade(uint id, string memory subject, uint8 grade) public onlyOwner {
+        require(students[id].exists, "No student");
+        Student storage s = students[id];
+        s.grades[subject] = grade;
+        if (!s.subjectAdded[subject]) {
+            s.subjects.push(subject);
+            s.subjectAdded[subject] = true;
+        }
+    }
+
+    function getGrade(uint id, string memory subject) public view returns (uint8) {
+        require(students[id].exists, "No student");
+        return students[id].grades[subject];
+    }
+
+    function averageGrade(uint id) public view returns (uint) {
+        require(students[id].exists, "No student");
+        Student storage s = students[id];
+        uint sum = 0;
+        uint count = s.subjects.length;
+        require(count > 0, "No grades");
+        for (uint i = 0; i < count; i++) {
+            sum += s.grades[s.subjects[i]];
+        }
+        return sum /count;
+    }
+}
