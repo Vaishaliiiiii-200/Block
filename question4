@@ -1,0 +1,72 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract HealthcareRecords {
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    struct Patient {
+        string name;
+        uint age;
+        string medicalHistory;
+    }
+
+    mapping(address => Patient) private records;
+    mapping(address => bool) private authorizedUsers;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not contract owner");
+        _;
+    }
+
+    modifier onlyAuthorized() {
+        require(authorizedUsers[msg.sender], "Not authorized");
+        _;
+    }
+
+    function authorizeUser(address user) external onlyOwner {
+        authorizedUsers[user] = true;
+    }
+
+    function revokeAuthorization(address user) external onlyOwner {
+        authorizedUsers[user] = false;
+    }
+
+    function addRecord(address patientAddress, string memory name, uint age, string memory history) external onlyAuthorized {
+        records[patientAddress] = Patient(name, age, history);
+    }
+
+    function updateRecord(address patientAddress, string memory name, uint age, string memory history) external onlyAuthorized {
+        records[patientAddress] = Patient(name, age, history);
+    }
+
+    function getRecord(address patientAddress) external view returns (string memory, uint, string memory) {
+        Patient memory p = records[patientAddress];
+        return (p.name, p.age, p.medicalHistory);
+    }
+}
