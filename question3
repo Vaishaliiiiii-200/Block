@@ -1,0 +1,123 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract GradingSystem {
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    mapping(address => uint) private grades;
+    mapping(address => bool) private isStudent;
+    mapping(address => bool) private authorizedUsers;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not contract owner");
+        _;
+    }
+
+    modifier onlyAuthorized() {
+        require(authorizedUsers[msg.sender], "Not authorized");
+        _;
+    }
+
+    function addStudent(address student) external onlyOwner {
+        isStudent[student] = true;
+    }
+
+    function assignGrade(address student, uint grade) external onlyAuthorized {
+        require(isStudent[student], "Student not found");
+        grades[student] = grade;
+    }
+
+    function getGrade(address student) external view returns (uint) {
+        require(isStudent[student], "Student not found");
+        return grades[student];
+    }
+
+    function authorizeUser(address user) external onlyOwner {
+        authorizedUsers[user] = true;
+    }
+
+    function revokeAuthorization(address user) external onlyOwner {
+        authorizedUsers[user] = false;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
